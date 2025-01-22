@@ -3,6 +3,7 @@ from flask_cors import CORS
 from flask_login import LoginManager
 from models import db  # Import db instance from models package
 from routes.auth import auth  # Import auth blueprint
+from routes.onboarding import onboarding  # Import onboarding blueprint
 from models.user import User  # Import User model
 
 app = Flask(__name__)
@@ -17,21 +18,22 @@ app.config['SESSION_COOKIE_SECURE'] = 'True'
 
 db.init_app(app)
 
-with app.app_context():
+def create_tables():
     db.create_all()
+
+with app.app_context():
+    create_tables()
 
 login_manager = LoginManager()
 login_manager.session_protection = "strong"
 login_manager.init_app(app)
-
-def create_tables():
-    db.create_all()
 
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.filter_by(id=user_id).first()
 
 app.register_blueprint(auth, url_prefix='/auth')
+app.register_blueprint(onboarding, url_prefix='/ob')
 
 if __name__ == '__main__':
     app.run(debug=True)
