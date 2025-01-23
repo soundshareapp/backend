@@ -6,18 +6,18 @@ class UserData(db.Model):
     user_id = db.Column(db.String(36), db.ForeignKey('users.id'), primary_key=True)
     name = db.Column(db.String(150), nullable=False)
     avatar = db.Column(db.String(255), nullable=True)
-    completed_signup = db.Column(db.Boolean, default=False, nullable=False)
     spotify_token = db.Column(db.String(255), nullable=True)
+    completed_signup = db.Column(db.Boolean, default=False, nullable=False)
 
     # Use string reference to avoid circular dependency
     user = db.relationship('User', back_populates='user_data')
 
-    def __init__(self, user_id, name, avatar=None, completed_signup=False, spotify_token=None):
+    def __init__(self, user_id, name, avatar=None, spotify_token=None, completed_signup=False):
         self.user_id = user_id
         self.name = name
         self.avatar = avatar
-        self.completed_signup = completed_signup
         self.spotify_token = spotify_token
+        self.completed_signup = completed_signup
 
     def save(self):
         db.session.add(self)
@@ -26,3 +26,27 @@ class UserData(db.Model):
     @classmethod
     def get_by_user_id(cls, user_id):
         return cls.query.get(user_id)
+
+    @classmethod
+    def delete_data(cls, user_id):
+        data = cls.query.filter_by(user_id=user_id).first()
+        db.session.delete(data)
+        db.session.commit()
+
+    def update(self, name=None, avatar=None, spotify_token=None, completed_signup=None):
+        if name is not None:
+            self.name = name
+        if avatar is not None:
+            self.avatar = avatar
+        if completed_signup is not None:
+            self.completed_signup = completed_signup
+        if spotify_token is not None:
+            self.spotify_token = spotify_token
+        db.session.commit()
+
+    @classmethod
+    def update_by_user_id(cls, user_id, name=None, avatar=None, spotify_token=None, completed_signup=None):
+        data = cls.get_by_user_id(user_id)
+        if data is not None:
+            data.update(name=name, avatar=avatar,spotify_token=spotify_token, completed_signup=completed_signup)
+            db.session.commit()

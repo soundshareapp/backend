@@ -25,9 +25,16 @@ class User(UserMixin, db.Model):
         db.session.commit()
 
         if not UserData.get_by_user_id(self.id):
-            user_data = UserData(user_id=self.id, name="", avatar="", completed_signup=False, spotify_token="")
+            user_data = UserData(user_id=self.id, name="", avatar="", spotify_token="", completed_signup=False)
             user_data.save()
 
     @classmethod
     def get_by_email(cls, email):
         return cls.query.filter_by(email=email).first()
+
+    @classmethod
+    def delete_account(cls, user_id):
+        UserData.delete_data(user_id)
+        user = cls.query.filter_by(id=user_id).first()
+        db.session.delete(user)
+        db.session.commit()

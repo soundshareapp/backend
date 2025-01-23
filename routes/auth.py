@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, request
 from flask_login import login_user, logout_user, current_user
+from flask_login.utils import login_required
 from models.user import User
 import uuid
 
@@ -42,3 +43,9 @@ def logout():
 @auth.route('/status', methods=['GET'])
 def status():
     return jsonify({"authenticated": current_user.is_authenticated})
+
+@auth.route('/delete', methods=['POST'])
+@login_required
+def delete():
+    User.delete_account(current_user.id)
+    return jsonify({"message": "Successfully deleted account", "authenticated": False})
