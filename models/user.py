@@ -25,7 +25,7 @@ class User(UserMixin, db.Model):
         db.session.commit()
 
         if not UserData.get_by_user_id(self.id):
-            user_data = UserData(user_id=self.id, name="", avatar="", spotify_token="", completed_signup=False)
+            user_data = UserData(user_id=self.id, username="", name="", avatar="", spotify_token="", completed_signup=False)
             user_data.save()
 
     @classmethod

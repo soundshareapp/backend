@@ -4,6 +4,7 @@ class UserData(db.Model):
     __tablename__ = 'user_data'
 
     user_id = db.Column(db.String(36), db.ForeignKey('users.id'), primary_key=True)
+    username = db.Column(db.String(150), nullable=False)
     name = db.Column(db.String(150), nullable=False)
     avatar = db.Column(db.String(255), nullable=True)
     spotify_token = db.Column(db.String(255), nullable=True)
@@ -12,8 +13,9 @@ class UserData(db.Model):
     # Use string reference to avoid circular dependency
     user = db.relationship('User', back_populates='user_data')
 
-    def __init__(self, user_id, name, avatar=None, spotify_token=None, completed_signup=False):
+    def __init__(self, user_id, username, name, avatar=None, spotify_token=None, completed_signup=False):
         self.user_id = user_id
+        self.username = username
         self.name = name
         self.avatar = avatar
         self.spotify_token = spotify_token
@@ -33,7 +35,9 @@ class UserData(db.Model):
         db.session.delete(data)
         db.session.commit()
 
-    def update(self, name=None, avatar=None, spotify_token=None, completed_signup=None):
+    def update(self, username=None, name=None, avatar=None, spotify_token=None, completed_signup=None):
+        if username is not None:
+            self.username = username
         if name is not None:
             self.name = name
         if avatar is not None:
@@ -45,8 +49,8 @@ class UserData(db.Model):
         db.session.commit()
 
     @classmethod
-    def update_by_user_id(cls, user_id, name=None, avatar=None, spotify_token=None, completed_signup=None):
+    def update_by_user_id(cls, user_id, username=None, name=None, avatar=None, spotify_token=None, completed_signup=None):
         data = cls.get_by_user_id(user_id)
         if data is not None:
-            data.update(name=name, avatar=avatar,spotify_token=spotify_token, completed_signup=completed_signup)
+            data.update(username=username, name=name, avatar=avatar,spotify_token=spotify_token, completed_signup=completed_signup)
             db.session.commit()
