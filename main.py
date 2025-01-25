@@ -5,16 +5,13 @@ from models import db  # Import db instance from models package
 from routes.auth import auth  # Import auth blueprint
 from routes.onboarding import onboarding  # Import onboarding blueprint
 from models.user import User  # Import User model
+from config import Config
 
 app = Flask(__name__)
 
 CORS(app, origins='http://localhost:5173', supports_credentials=True)
 
-app.config['SECRET_KEY'] = 'mysecret'  # Change in production
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite3'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SESSION_COOKIE_SAMESITE'] = 'None'
-app.config['SESSION_COOKIE_SECURE'] = 'True'
+app.config.from_object(Config)
 
 db.init_app(app)
 
