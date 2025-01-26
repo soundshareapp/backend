@@ -66,7 +66,7 @@ def spotify_callback():
         user_id=user_id, spotify_token=access_token, spotify_refresh_token=refresh_token
     )
 
-    return jsonify({"message": "Spotify connected successfully!"})
+    return redirect("http://localhost:5173/#/onboarding?spotify_connected=true")
 
 
 # Step 3: Refresh token endpoint
@@ -96,3 +96,16 @@ def refresh_spotify_token():
     )
 
     return jsonify({"message": "Token refreshed successfully"})
+
+@spotify.route("/user-info")
+def get_info():
+    user_data = UserData.query.filter_by(user_id=current_user.id).first()
+    if not user_data or not user_data.spotify_token:
+        return jsonify({"error": "No token found"}), 400
+    
+    headers = {"Authorization": f"Bearer {user_data.spotify_token}"}
+    
+    profile_response = requests.get("https://api.spotify.com/v1/me", headers=headers)
+    profile_data = profile_response.json()
+
+    return profile_data
