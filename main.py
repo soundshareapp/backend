@@ -5,6 +5,7 @@ from models import db  # Import db instance from models package
 from routes.auth import auth  # Import auth blueprint
 from routes.onboarding import onboarding  # Import onboarding blueprint
 from routes.spotify import spotify
+from routes.userdata import userdata
 from models.user import User  # Import User model
 from config import Config
 
@@ -33,6 +34,7 @@ def load_user(user_id):
 app.register_blueprint(auth, url_prefix='/auth')
 app.register_blueprint(onboarding, url_prefix='/ob')
 app.register_blueprint(spotify, url_prefix='/spotify')
+app.register_blueprint(userdata, url_prefix='/userdata')
 
 if __name__ == '__main__':
     app.run(debug=True)

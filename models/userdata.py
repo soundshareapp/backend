@@ -38,7 +38,7 @@ class UserData(db.Model):
         db.session.commit()
 
     @classmethod
-    def get_by_user_id(cls, user_id):
+    def get(cls, user_id):
         return cls.query.get(user_id)
 
     @classmethod
@@ -81,7 +81,7 @@ class UserData(db.Model):
         spotify_refresh_token=None,
         completed_signup=None,
     ):
-        data = cls.get_by_user_id(user_id)
+        data = cls.get(user_id)
         if data is not None:
             data.update(
                 username=username,

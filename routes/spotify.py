@@ -1,5 +1,5 @@
 import requests
-from flask import Blueprint, redirect, request, jsonify, session
+from flask import Blueprint, redirect, request, jsonify
 from flask_login import login_required, current_user
 from models import db
 from models.userdata import UserData
@@ -27,10 +27,12 @@ def spotify_login():
 @spotify.route("/callback")
 def spotify_callback():
     code = request.args.get("code")
-    user_id = request.args.get('state')
+    user_id = request.args.get("state")
 
     if not code:
-        return jsonify({"error": "Authorization failed"}), 400
+        return redirect(
+            "http://localhost:5173/#/onboarding?spotify_connection=failed&reason=Authorization%20Failed"
+        )
 
     # Exchange authorization code for access token
     token_url = "https://accounts.spotify.com/api/token"
@@ -39,7 +41,9 @@ def spotify_callback():
         "code": code,
         "redirect_uri": Config.SPOTIFY_REDIRECT_URI,
     }
-    encoded_creds = base64.b64encode(f"{Config.SPOTIFY_CLIENT_ID}:{Config.SPOTIFY_CLIENT_SECRET}".encode()).decode()
+    encoded_creds = base64.b64encode(
+        f"{Config.SPOTIFY_CLIENT_ID}:{Config.SPOTIFY_CLIENT_SECRET}".encode()
+    ).decode()
     headers = {
         "Authorization": f"Basic {encoded_creds}",
         "Content-Type": "application/x-www-form-urlencoded",
@@ -49,7 +53,9 @@ def spotify_callback():
     token_info = response.json()
 
     if "access_token" not in token_info:
-        return jsonify({"error": "Failed to retrieve access token"}), 400
+        return redirect(
+            "http://localhost:5173/#/onboarding?spotify_connection=failed&reason=Failed%20to%retrieve%20access%20token"
+        )
 
     access_token = token_info["access_token"]
     refresh_token = token_info["refresh_token"]
@@ -60,17 +66,21 @@ def spotify_callback():
 
     email = profile_data.get("email")
     if not email:
-        return jsonify({"error": "Failed to get user profile"}), 400
+        return redirect(
+            "http://localhost:5173/#/onboarding?spotify_connection=failed&reason=Failed%20to%20get%20user%20profile"
+        )
+
+    avatar_url = profile_data.get("images")[0]['url']
 
     UserData.update_by_user_id(
-        user_id=user_id, spotify_token=access_token, spotify_refresh_token=refresh_token
+        user_id=user_id, spotify_token=access_token, spotify_refresh_token=refresh_token, avatar=avatar_url
     )
 
-    return redirect("http://localhost:5173/#/onboarding?spotify_connected=true")
+    return redirect("http://localhost:5173/#/onboarding?spotify_connection=success")
 
 
-# Step 3: Refresh token endpoint
 @spotify.route("/refresh-token")
+@login_required
 def refresh_spotify_token():
     user_data = UserData.query.filter_by(user_id=current_user.id).first()
     if not user_data or not user_data.spotify_refresh_token:
@@ -97,14 +107,16 @@ def refresh_spotify_token():
 
     return jsonify({"message": "Token refreshed successfully"})
 
+
 @spotify.route("/user-info")
+@login_required
 def get_info():
-    user_data = UserData.query.filter_by(user_id=current_user.id).first()
+    user_data = UserData.get(current_user.id)
     if not user_data or not user_data.spotify_token:
         return jsonify({"error": "No token found"}), 400
-    
+
     headers = {"Authorization": f"Bearer {user_data.spotify_token}"}
-    
+
     profile_response = requests.get("https://api.spotify.com/v1/me", headers=headers)
     profile_data = profile_response.json()
 
