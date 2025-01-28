@@ -30,6 +30,8 @@ def get_multiple_data(params):
     data = UserData.get(current_user.id)
     result = {}
     for param in params_list:
+        if param == 'spotify_token' or param == 'spotify_refresh_token':
+            return jsonify({"message": "Invalid parameter"}), 400
         value = getattr(data, param, None)
         if value is None:
             return jsonify({"message": f"Invalid parameter: {param}"}), 400
@@ -46,4 +48,4 @@ def get_data(param:str):
         if value is None:
             return jsonify({"message": f"Invalid parameter: {param}"}), 400
         return value
-    
+    return jsonify({"message": "Invalid parameter"}), 400
