@@ -2,6 +2,7 @@ from flask import Flask
 from flask_cors import CORS
 from flask_login import LoginManager
 from models import db  # Import db instance from models package
+from routes.friends import friends
 from routes.auth import auth  # Import auth blueprint
 from routes.onboarding import onboarding  # Import onboarding blueprint
 from routes.spotify import spotify
@@ -35,6 +36,7 @@ app.register_blueprint(auth, url_prefix='/auth')
 app.register_blueprint(onboarding, url_prefix='/ob')
 app.register_blueprint(spotify, url_prefix='/spotify')
 app.register_blueprint(userdata, url_prefix='/userdata')
+app.register_blueprint(friends, url_prefix='/friends')
 
 if __name__ == '__main__':
     app.run(debug=True)

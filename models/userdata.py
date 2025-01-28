@@ -40,6 +40,10 @@ class UserData(db.Model):
     @classmethod
     def get(cls, user_id):
         return cls.query.get(user_id)
+    
+    @classmethod
+    def get_by_username(cls, username):
+        return cls.query.filter_by(username=username).first()
 
     @classmethod
     def delete_data(cls, user_id):

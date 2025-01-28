@@ -4,3 +4,4 @@ db = SQLAlchemy()
 
 from .user import User
 from .userdata import UserData
+from .friendlist import FriendList
