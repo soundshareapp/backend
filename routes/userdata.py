@@ -9,7 +9,7 @@ userdata = Blueprint("userdata", __name__)
 def update_data():
     data:dict = request.get_json()
  
-    username_check = UserData.check_username(data.get('username', ''))
+    username_check = UserData.check_username(data.get('username', ''), current_user.id)
     
     if username_check.get('error'):
         return jsonify({"error" : username_check['error']})
