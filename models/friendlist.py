@@ -22,7 +22,8 @@ class FriendList(db.Model):
         """Send a friend request."""
         # Ensure request doesn't already exist
         existing_request = cls.query.filter_by(user1_id=sender_id, user2_id=receiver_id).first()
-        if not existing_request:
+        existing_request_reverse = cls.query.filter_by(user1_id=receiver_id, user2_id=sender_id).first()
+        if not existing_request and not existing_request_reverse:
             request = cls(user1_id=sender_id, user2_id=receiver_id)
             db.session.add(request)
             db.session.commit()

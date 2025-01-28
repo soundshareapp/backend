@@ -23,7 +23,6 @@ class User(UserMixin, db.Model):
     def save(self):
         db.session.add(self)
         db.session.commit()
-
         if not UserData.get(self.id):
             user_data = UserData(user_id=self.id, username="", name="", avatar="", spotify_token="", completed_signup=False)
             user_data.save()
