@@ -12,7 +12,7 @@ from config import Config
 
 app = Flask(__name__)
 
-CORS(app, origins='http://localhost:5173', supports_credentials=True)
+CORS(app, origins=Config.ALLOW_URLS, supports_credentials=True)
 
 app.config.from_object(Config)
 

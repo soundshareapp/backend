@@ -2,7 +2,8 @@ from . import db
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 import uuid
-from .userdata import UserData
+from models.userdata import UserData
+from models.friendlist import FriendList
 
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
@@ -34,6 +35,7 @@ class User(UserMixin, db.Model):
     @classmethod
     def delete_account(cls, user_id):
         UserData.delete_data(user_id)
+        FriendList.delete_user(user_id)
         user = cls.query.filter_by(id=user_id).first()
         db.session.delete(user)
         db.session.commit()
