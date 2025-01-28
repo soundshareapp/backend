@@ -1,11 +1,11 @@
 from . import db
-
+import re
 
 class UserData(db.Model):
     __tablename__ = "user_data"
 
     user_id = db.Column(db.String(36), db.ForeignKey("users.id"), primary_key=True)
-    username = db.Column(db.String(150), nullable=False)
+    username = db.Column(db.String(150), nullable=False, unique=True)
     name = db.Column(db.String(150), nullable=False)
     avatar = db.Column(db.String(255), nullable=True)
     spotify_token = db.Column(db.String(255), nullable=True)
@@ -92,3 +92,13 @@ class UserData(db.Model):
                 completed_signup=completed_signup,
             )
             db.session.commit()
+
+    @classmethod
+    def check_username(cls, test_username: str):
+        if re.match("^[a-z][a-z0-9._-]{4,19}$", test_username):
+            if (cls.query.filter_by(username=test_username).first() is not None):
+                return {'error': 'username_taken'}
+            else:
+                return {'success': 'username_available'}
+        else:
+            return {'error': 'invalid_username'}

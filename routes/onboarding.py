@@ -1,6 +1,5 @@
 from flask import Blueprint, jsonify
 from flask_login import current_user, login_required
-from flask_login.utils import request
 from models.userdata import UserData
 
 onboarding = Blueprint('onboarding', __name__)
