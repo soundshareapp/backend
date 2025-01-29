@@ -41,4 +41,4 @@ app.register_blueprint(friends, url_prefix='/friends')
 app.register_blueprint(chat, url_prefix='/chat')
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True)

@@ -139,3 +139,20 @@ def get_info():
     profile_data = profile_response.json()
 
     return profile_data
+
+@spotify.route("/get-song-info/<song_id>", methods=['GET'])
+@login_required
+def get_song_info(song_id):
+    user_data = UserData.get(current_user.id)
+    if not user_data or not user_data.spotify_token:
+        return jsonify({"error": "No token found"}), 400
+
+    if not song_id:
+        return jsonify({"error": "No song ID provided"}), 400
+    
+    headers = {"Authorization": f"Bearer {user_data.spotify_token}"}
+
+    track_response = requests.get(f"https://api.spotify.com/v1/tracks/{song_id}", headers=headers)
+    track_data = track_response.json()
+
+    return track_data
