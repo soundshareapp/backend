@@ -2,6 +2,7 @@ from flask import Flask
 from flask_cors import CORS
 from flask_login import LoginManager
 from models import db  # Import db instance from models package
+from routes.chat import chat
 from routes.friends import friends
 from routes.auth import auth  # Import auth blueprint
 from routes.onboarding import onboarding  # Import onboarding blueprint
@@ -37,6 +38,7 @@ app.register_blueprint(onboarding, url_prefix='/ob')
 app.register_blueprint(spotify, url_prefix='/spotify')
 app.register_blueprint(userdata, url_prefix='/userdata')
 app.register_blueprint(friends, url_prefix='/friends')
+app.register_blueprint(chat, url_prefix='/chat')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=5000)

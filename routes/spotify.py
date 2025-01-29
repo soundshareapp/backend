@@ -8,6 +8,8 @@ from models.userdata import UserData
 from config import Config
 import base64
 
+frontendUrl = Config.ALLOW_URLS[0]
+
 spotify = Blueprint("spotify", __name__)
 
 
@@ -33,7 +35,7 @@ def spotify_callback():
 
     if not code:
         return redirect(
-            "http://localhost:5173/#/onboarding?spotify_connection=failed&reason=Authorization%20Failed"
+            f"{frontendUrl}/#/onboarding?spotify_connection=failed&reason=Authorization%20Failed"
         )
 
     # Exchange authorization code for access token
@@ -56,7 +58,7 @@ def spotify_callback():
 
     if "access_token" not in token_info:
         return redirect(
-            "http://localhost:5173/#/onboarding?spotify_connection=failed&reason=Failed%20to%20retrieve%20access%20token"
+            f"{frontendUrl}/#/onboarding?spotify_connection=failed&reason=Failed%20to%20retrieve%20access%20token"
         )
 
     access_token = token_info["access_token"]
@@ -72,7 +74,7 @@ def spotify_callback():
     email = profile_data.get("email")
     if not email:
         return redirect(
-            "http://localhost:5173/#/onboarding?spotify_connection=failed&reason=Failed%20to%20get%20user%20profile"
+            f"{frontendUrl}#/onboarding?spotify_connection=failed&reason=Failed%20to%20get%20user%20profile"
         )
 
     avatar_url = profile_data.get("images")[0]["url"]
@@ -85,7 +87,7 @@ def spotify_callback():
         token_expires_at=expires_at,
     )
 
-    return redirect("http://localhost:5173/#/onboarding?spotify_connection=success")
+    return redirect(f"{frontendUrl}#/onboarding?spotify_connection=success")
 
 
 @spotify.route("/refresh-token")

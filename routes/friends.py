@@ -1,5 +1,6 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify
 from flask_login import login_required, current_user
+from models.chatlist import ChatList
 from models.userdata import UserData
 from models.friendlist import FriendList
 
@@ -49,6 +50,7 @@ def accept_friend_request(id):
         return jsonify({'error': 'User not found.'})
     
     FriendList.accept_friend_request(id, current_user.id)
+    ChatList.get_chat(user1_id=id, user2_id=current_user.id)
     return jsonify({'message': 'Friend request accepted.'})
 
 @friends.route('/reject/<id>', methods=['POST'])
@@ -59,3 +61,14 @@ def reject_friend_request(id):
     
     FriendList.reject_friend_request(id, current_user.id)
     return jsonify({'message': 'Friend request rejected.'})
+
+@friends.route('/<id>', methods=['GET'])
+@login_required
+def get_friend_data(id):
+    if not UserData.get(id):
+        return jsonify({'error': 'User not found.'})
+    
+    if id not in FriendList.get_friends(current_user.id):
+        return jsonify({'error': 'User is not your friend.'})
+    
+    return jsonify({'name': UserData.get(id).name, 'username': UserData.get(id).username, 'avatar': UserData.get(id).avatar})

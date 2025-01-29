@@ -1,10 +1,14 @@
 from datetime import datetime
+import random
 from sqlalchemy import Column, Integer, ForeignKey, JSON, UniqueConstraint
 from sqlalchemy.orm import relationship
 from . import db
 
+alphabet = "abcdefghijklmnopqrstuvwxyz0123456789"
+def gen_message_id():
+    return ''.join(random.choices(alphabet, k=16))
 
-class Chat(db.Model):
+class ChatList(db.Model):
     __tablename__ = "chats"
 
     id = Column(Integer, primary_key=True)
@@ -33,6 +37,15 @@ class Chat(db.Model):
             db.session.commit()
         return chat
 
+    def get_user_chats(user_id):
+        return ChatList.query.filter_by(user1_id=user_id).all() + ChatList.query.filter_by(user2_id=user_id).all()
+    
+    def get_last_timestamp(self):
+        if (len(self.messages) > 0):
+            return self.messages[-1]['timestamp']
+        else:
+            return None
+
     def add_message(
         self,
         sender_id: str,
@@ -42,6 +55,7 @@ class Chat(db.Model):
     ):
         """Append a new message JSON object to the messages list."""
         new_message = {
+            "id": gen_message_id(),
             "sender_id": sender_id,
             "timestamp": datetime.now(),
             "songlink": songlink,
