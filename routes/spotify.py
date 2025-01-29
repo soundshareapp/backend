@@ -1,3 +1,5 @@
+import datetime
+import math
 import requests
 from flask import Blueprint, redirect, request, jsonify
 from flask_login import login_required, current_user
@@ -54,11 +56,14 @@ def spotify_callback():
 
     if "access_token" not in token_info:
         return redirect(
-            "http://localhost:5173/#/onboarding?spotify_connection=failed&reason=Failed%20to%retrieve%20access%20token"
+            "http://localhost:5173/#/onboarding?spotify_connection=failed&reason=Failed%20to%20retrieve%20access%20token"
         )
 
     access_token = token_info["access_token"]
     refresh_token = token_info["refresh_token"]
+    expires_at = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(
+        seconds=token_info["expires_in"]
+    )
 
     headers = {"Authorization": f"Bearer {access_token}"}
     profile_response = requests.get("https://api.spotify.com/v1/me", headers=headers)
@@ -70,10 +75,14 @@ def spotify_callback():
             "http://localhost:5173/#/onboarding?spotify_connection=failed&reason=Failed%20to%20get%20user%20profile"
         )
 
-    avatar_url = profile_data.get("images")[0]['url']
+    avatar_url = profile_data.get("images")[0]["url"]
 
-    UserData.update_by_user_id(
-        user_id=user_id, spotify_token=access_token, spotify_refresh_token=refresh_token, avatar=avatar_url
+    UserData.update(
+        user_id=user_id,
+        spotify_token=access_token,
+        spotify_refresh_token=refresh_token,
+        avatar=avatar_url,
+        token_expires_at=expires_at,
     )
 
     return redirect("http://localhost:5173/#/onboarding?spotify_connection=success")
@@ -98,14 +107,21 @@ def refresh_spotify_token():
     )
     new_token_info = response.json()
 
+    expires_at = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(
+        seconds=new_token_info["expires_in"]
+    )
+
     if "access_token" not in new_token_info:
         return jsonify({"error": "Failed to refresh token"}), 400
 
-    UserData.update_by_user_id(
-        current_user.id, spotify_token=new_token_info["access_token"]
+    UserData.update(
+        current_user.id,
+        spotify_token=new_token_info["access_token"],
+        spotify_refresh_token=new_token_info.get("refresh_token", user_data.spotify_refresh_token),
+        token_expires_at=expires_at,
     )
 
-    return jsonify({"message": "Token refreshed successfully"})
+    return jsonify({"success": "Token refreshed successfully", "expires_at": expires_at})
 
 
 @spotify.route("/user-info")

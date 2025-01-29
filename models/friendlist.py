@@ -2,7 +2,6 @@ from sqlalchemy import Column, Integer, ForeignKey, String, UniqueConstraint
 from sqlalchemy.orm import relationship
 from . import db
 
-
 class FriendList(db.Model):
     __tablename__ = "friendlists"
 

@@ -22,6 +22,6 @@ def check_status():
 @onboarding.route('/complete', methods=['POST'])
 @login_required
 def complete_onboarding():
-    UserData.update_by_user_id(current_user.id, completed_signup=True)
+    UserData.update(current_user.id, completed_signup=True)
     print(UserData.get(current_user.id))
     return jsonify({'status': 'Complete'})
