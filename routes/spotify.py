@@ -156,3 +156,20 @@ def get_song_info(song_id):
     track_data = track_response.json()
 
     return track_data
+
+@spotify.route("/search/<query>", methods=['GET'])
+@login_required
+def search(query):
+    user_data = UserData.get(current_user.id)
+    if not user_data or not user_data.spotify_token:
+        return jsonify({"error": "No token found"}), 400
+
+    if not query:
+        return jsonify({"error": "No query provided"}), 400
+
+    headers = {"Authorization": f"Bearer {user_data.spotify_token}"}
+
+    search_response = requests.get(f"https://api.spotify.com/v1/search?q={query}&type=track&limit=5", headers=headers)
+    search_data = search_response.json()
+
+    return search_data
