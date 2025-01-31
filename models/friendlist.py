@@ -1,5 +1,7 @@
 from sqlalchemy import Column, Integer, ForeignKey, String, UniqueConstraint
 from sqlalchemy.orm import relationship
+
+from models.chatlist import ChatList
 from . import db
 
 class FriendList(db.Model):
@@ -58,6 +60,7 @@ class FriendList(db.Model):
         if request:
             request.status = "accepted"
             db.session.commit()
+            ChatList.get_chat(user1_id=sender_id, user2_id=receiver_id)
             return request
         return None
 

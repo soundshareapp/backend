@@ -50,7 +50,6 @@ def accept_friend_request(id):
         return jsonify({'error': 'User not found.'})
     
     FriendList.accept_friend_request(id, current_user.id)
-    ChatList.get_chat(user1_id=id, user2_id=current_user.id)
     return jsonify({'message': 'Friend request accepted.'})
 
 @friends.route('/reject/<id>', methods=['POST'])

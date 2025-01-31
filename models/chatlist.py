@@ -1,12 +1,35 @@
-from datetime import datetime
+from datetime import datetime, timezone
+import math
 import random
 from sqlalchemy import Column, Integer, ForeignKey, JSON, UniqueConstraint
 from sqlalchemy.orm import relationship
 from . import db
+from typing import TypedDict
+
+
+class SongData(TypedDict):
+    title: str
+    artist: str
+    album: str
+    cover: str
+    url: str
+
+
+class ChatMessage(TypedDict):
+    id: str
+    sender_id: str
+    timestamp: datetime
+    song: SongData
+    note: str | None
+    rating: int | None
+
 
 alphabet = "abcdefghijklmnopqrstuvwxyz0123456789"
+
+
 def gen_message_id():
-    return ''.join(random.choices(alphabet, k=16))
+    return "".join(random.choices(alphabet, k=16))
+
 
 class ChatList(db.Model):
     __tablename__ = "chats"
@@ -38,35 +61,39 @@ class ChatList(db.Model):
         return chat
 
     def get_user_chats(user_id):
-        return ChatList.query.filter_by(user1_id=user_id).all() + ChatList.query.filter_by(user2_id=user_id).all()
-    
+        return (
+            ChatList.query.filter_by(user1_id=user_id).all()
+            + ChatList.query.filter_by(user2_id=user_id).all()
+        )
+
     def get_last_timestamp(self):
-        if (len(self.messages) > 0):
-            return self.messages[-1]['timestamp']
+        if len(self.messages) > 0:
+            return self.messages[-1]["timestamp"]
         else:
             return None
 
     def add_message(
         self,
         sender_id: str,
-        songlink: str,
-        rating: int,
-        note: str | None,
+        song: SongData,
+        note: str | None = None,
     ):
         """Append a new message JSON object to the messages list."""
-        new_message = {
+        new_message: ChatMessage = {
             "id": gen_message_id(),
             "sender_id": sender_id,
-            "timestamp": datetime.now(),
-            "songlink": songlink,
+            "timestamp": math.floor(datetime.now(timezone.utc).timestamp()),
+            "song": song,
+            "rating": None,
             "note": note,
-            "rating": rating,
         }
-        self.messages.append(new_message)
+        self.messages = self.messages + [new_message]
         db.session.commit()
 
     def get_messages(self):
         return self.messages
 
     def get_after_timestmp(self, timestamp):
-        return [message for message in self.messages if message["timestamp"] > timestamp]
+        return [
+            message for message in self.messages if message["timestamp"] > timestamp
+        ]
