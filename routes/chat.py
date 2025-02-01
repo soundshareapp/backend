@@ -50,7 +50,13 @@ def send_message(id):
         currentChat.add_message(
             sender_id=current_user.id, song=message["song"], note=message.get("note")
         )
-        print(currentChat.get_messages())
         return jsonify({"success": True})
 
     return jsonify({"success": False})
+
+@chat.route("/<id>/delete/<message_id>/", methods=["POST"])
+@login_required
+def delete_message(id, message_id): 
+    currentChat = ChatList.get_chat(user1_id=id, user2_id=current_user.id)
+    currentChat.delete_message(message_id)
+    return jsonify({"success": True})

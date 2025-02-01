@@ -68,7 +68,7 @@ class ChatList(db.Model):
 
     def get_last_timestamp(self):
         if len(self.messages) > 0:
-            return self.messages[-1]["timestamp"]
+            return self.messages[0]["timestamp"]
         else:
             return None
 
@@ -82,13 +82,19 @@ class ChatList(db.Model):
         new_message: ChatMessage = {
             "id": gen_message_id(),
             "sender_id": sender_id,
-            "timestamp": math.floor(datetime.now(timezone.utc).timestamp()),
+            # Converting timestamp to milliseconds for frontend
+            "timestamp": math.floor(datetime.now(timezone.utc).timestamp() * 1000),
             "song": song,
             "rating": None,
             "note": note,
         }
-        self.messages = self.messages + [new_message]
+        self.messages = [new_message] + self.messages 
         db.session.commit()
+
+    def delete_message(self, message_id):
+        self.messages = [
+            message for message in self.messages if message["id"] != message_id
+        ]
 
     def get_messages(self):
         return self.messages
