@@ -15,14 +15,14 @@ def get_chat_list():
     for chat in chats:
         other_user = chat.user1_id if chat.user1_id != user_id else chat.user2_id
         chat_data = {
-            'id': chat.id,
-            'userdata': {
-                'id': other_user,
-                'name': UserData.get(other_user).name,
-                'username': UserData.get(other_user).username,
-                'avatar': UserData.get(other_user).avatar,
+            "id": chat.id,
+            "userdata": {
+                "id": other_user,
+                "name": UserData.get(other_user).name,
+                "username": UserData.get(other_user).username,
+                "avatar": UserData.get(other_user).avatar,
             },
-            'timestamp': chat.get_last_timestamp(),
+            "timestamp": chat.get_last_timestamp(),
         }
         chatlist.append(chat_data)
     return chatlist
@@ -54,9 +54,26 @@ def send_message(id):
 
     return jsonify({"success": False})
 
+
+@chat.route("/<id>/rate/<message_id>/<rating>/", methods=["POST"])
+@login_required
+def rate_message(id, message_id, rating):
+    currentChat = ChatList.get_chat(user1_id=id, user2_id=current_user.id)
+
+    if currentChat.get_message(message_id).get("sender_id") == current_user.id:
+        return jsonify({"success": False})
+    
+    currentChat.rate_message(message_id, rating)
+    return jsonify({"success": True})
+
+
 @chat.route("/<id>/delete/<message_id>/", methods=["POST"])
 @login_required
-def delete_message(id, message_id): 
+def delete_message(id, message_id):
     currentChat = ChatList.get_chat(user1_id=id, user2_id=current_user.id)
+
+    if currentChat.get_message(message_id).get("sender_id") != current_user.id:
+        return jsonify({"success": False})
+
     currentChat.delete_message(message_id)
     return jsonify({"success": True})

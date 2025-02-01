@@ -3,6 +3,8 @@ import math
 import random
 from sqlalchemy import Column, Integer, ForeignKey, JSON, UniqueConstraint
 from sqlalchemy.orm import relationship
+from sqlalchemy.orm.attributes import flag_modified
+from sqlalchemy.ext.mutable import MutableList
 from . import db
 from typing import TypedDict
 
@@ -37,7 +39,7 @@ class ChatList(db.Model):
     id = Column(Integer, primary_key=True)
     user1_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     user2_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    messages = Column(JSON, default=[], nullable=False)
+    messages = Column(MutableList.as_mutable(JSON), default=[], nullable=False)
 
     __table_args__ = (
         UniqueConstraint("user1_id", "user2_id", name="unique_chat_pair"),
@@ -88,16 +90,31 @@ class ChatList(db.Model):
             "rating": None,
             "note": note,
         }
-        self.messages = [new_message] + self.messages 
+        self.messages.insert(0, new_message)
         db.session.commit()
 
     def delete_message(self, message_id):
         self.messages = [
             message for message in self.messages if message["id"] != message_id
         ]
+        db.session.commit()
 
-    def get_messages(self):
+    def get_messages(self) -> list[ChatMessage]:
         return self.messages
+    
+    def get_message(self, message_id) -> ChatMessage | None:
+        for message in self.messages:
+            if message["id"] == message_id:
+                return message
+        return None
+    
+    def rate_message(self, message_id, rating):
+        for message in self.messages:
+            if message["id"] == message_id:
+                message["rating"] = rating
+
+        flag_modified(self, "messages")
+        db.session.commit()
 
     def get_after_timestmp(self, timestamp):
         return [
