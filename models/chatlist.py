@@ -101,13 +101,13 @@ class ChatList(db.Model):
 
     def get_messages(self) -> list[ChatMessage]:
         return self.messages
-    
+
     def get_message(self, message_id) -> ChatMessage | None:
         for message in self.messages:
             if message["id"] == message_id:
                 return message
         return None
-    
+
     def rate_message(self, message_id, rating):
         for message in self.messages:
             if message["id"] == message_id:

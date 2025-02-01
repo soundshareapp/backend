@@ -37,7 +37,8 @@ def get_multiple(params):
     }
     return jsonify(result)
 
-'''
+
+"""
 @userdata.route("/get/<param>", methods=["GET"])
 @login_required
 def get_single(param: str):
@@ -48,4 +49,4 @@ def get_single(param: str):
             return jsonify({"error": f"No value for: {param}"}), 400
         return {}
     return jsonify({"error": f"Cannot access {param}"}), 400
-'''
+"""

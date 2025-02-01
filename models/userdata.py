@@ -1,6 +1,7 @@
 from . import db
 import re
 
+
 class UserData(db.Model):
     __tablename__ = "user_data"
 
@@ -43,7 +44,7 @@ class UserData(db.Model):
     @classmethod
     def get(cls, user_id):
         return cls.query.get(user_id)
-    
+
     @classmethod
     def get_by_username(cls, username):
         return cls.query.filter_by(username=username).first()
@@ -87,9 +88,14 @@ class UserData(db.Model):
     @classmethod
     def check_username(cls, test_username: str, user_id: str):
         if re.match("^[a-z][a-z0-9._-]{4,19}$", test_username):
-            if (cls.query.filter(cls.username == test_username, cls.user_id != user_id).first() is not None):
-                return {'error': 'username_taken'}
+            if (
+                cls.query.filter(
+                    cls.username == test_username, cls.user_id != user_id
+                ).first()
+                is not None
+            ):
+                return {"error": "username_taken"}
             else:
-                return {'success': 'username_available'}
+                return {"success": "username_available"}
         else:
-            return {'error': 'invalid_username'}
+            return {"error": "invalid_username"}

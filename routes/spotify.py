@@ -119,11 +119,15 @@ def refresh_spotify_token():
     UserData.update(
         current_user.id,
         spotify_token=new_token_info["access_token"],
-        spotify_refresh_token=new_token_info.get("refresh_token", user_data.spotify_refresh_token),
+        spotify_refresh_token=new_token_info.get(
+            "refresh_token", user_data.spotify_refresh_token
+        ),
         token_expires_at=expires_at,
     )
 
-    return jsonify({"success": "Token refreshed successfully", "expires_at": expires_at})
+    return jsonify(
+        {"success": "Token refreshed successfully", "expires_at": expires_at}
+    )
 
 
 @spotify.route("/user-info")
@@ -140,7 +144,8 @@ def get_info():
 
     return profile_data
 
-@spotify.route("/get-song-info/<song_id>", methods=['GET'])
+
+@spotify.route("/get-song-info/<song_id>", methods=["GET"])
 @login_required
 def get_song_info(song_id):
     user_data = UserData.get(current_user.id)
@@ -149,15 +154,18 @@ def get_song_info(song_id):
 
     if not song_id:
         return jsonify({"error": "No song ID provided"}), 400
-    
+
     headers = {"Authorization": f"Bearer {user_data.spotify_token}"}
 
-    track_response = requests.get(f"https://api.spotify.com/v1/tracks/{song_id}", headers=headers)
+    track_response = requests.get(
+        f"https://api.spotify.com/v1/tracks/{song_id}", headers=headers
+    )
     track_data = track_response.json()
 
     return track_data
 
-@spotify.route("/search/<query>", methods=['GET'])
+
+@spotify.route("/search/<query>", methods=["GET"])
 @login_required
 def search(query):
     user_data = UserData.get(current_user.id)
@@ -169,7 +177,10 @@ def search(query):
 
     headers = {"Authorization": f"Bearer {user_data.spotify_token}"}
 
-    search_response = requests.get(f"https://api.spotify.com/v1/search?q={query}&type=track&limit=5", headers=headers)
+    search_response = requests.get(
+        f"https://api.spotify.com/v1/search?q={query}&type=track&limit=5",
+        headers=headers,
+    )
     search_data = search_response.json()
 
     return search_data

@@ -4,6 +4,7 @@ from sqlalchemy.orm import relationship
 from models.chatlist import ChatList
 from . import db
 
+
 class FriendList(db.Model):
     __tablename__ = "friendlists"
 
@@ -101,6 +102,9 @@ class FriendList(db.Model):
     @classmethod
     def delete_user(cls, user_id):
         """Delete all friend associations for a user."""
-        requests = cls.query.filter_by(user1_id=user_id).all() + cls.query.filter_by(user2_id=user_id).all()
+        requests = (
+            cls.query.filter_by(user1_id=user_id).all()
+            + cls.query.filter_by(user2_id=user_id).all()
+        )
         for request in requests:
             db.session.delete(request)

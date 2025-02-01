@@ -62,7 +62,7 @@ def rate_message(id, message_id, rating):
 
     if currentChat.get_message(message_id).get("sender_id") == current_user.id:
         return jsonify({"success": False})
-    
+
     currentChat.rate_message(message_id, rating)
     return jsonify({"success": True})
 

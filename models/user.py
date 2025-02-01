@@ -5,9 +5,12 @@ import uuid
 from models.userdata import UserData
 from models.friendlist import FriendList
 
+
 class User(UserMixin, db.Model):
-    __tablename__ = 'users'
-    user_data = db.relationship('UserData', back_populates='user', uselist=False, cascade="all, delete-orphan")
+    __tablename__ = "users"
+    user_data = db.relationship(
+        "UserData", back_populates="user", uselist=False, cascade="all, delete-orphan"
+    )
 
     id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     email = db.Column(db.String(150), unique=True, nullable=False)
